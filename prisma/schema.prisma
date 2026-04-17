@@ -1,0 +1,271 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────
+// TENANCY & IDENTITY
+// ─────────────────────────────────────────
+
+model Organization {
+  id           String   @id @default(cuid())
+  clerkOrgId   String   @unique
+  name         String
+  slug         String   @unique
+  timezone     String   @default("UTC")
+  locale       String   @default("en")
+  currency     String   @default("GBP")
+  phone        String?
+  email        String?
+  address      String?
+  logoUrl      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscription  Subscription?
+  diningAreas   DiningArea[]
+  tables        Table[]
+  reservations  Reservation[]
+  members       OrganizationMember[]
+  settings      OrganizationSettings?
+
+  @@index([clerkOrgId])
+  @@index([slug])
+}
+
+model OrganizationMember {
+  id             String      @id @default(cuid())
+  organizationId String
+  clerkUserId    String
+  role           OrgRole
+  createdAt      DateTime    @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, clerkUserId])
+  @@index([organizationId])
+  @@index([clerkUserId])
+}
+
+enum OrgRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+model OrganizationSettings {
+  id                       String       @id @default(cuid())
+  organizationId           String       @unique
+  defaultResDurationMins   Int          @default(90)
+  openingTime              String       @default("09:00")
+  closingTime              String       @default("23:00")
+  slotIntervalMins         Int          @default(15)
+  maxPartySize             Int          @default(20)
+  requireDeposit           Boolean      @default(false)
+  depositAmount            Decimal?
+  reminderHoursBefore      Int          @default(24)
+  confirmationEmailEnabled Boolean      @default(true)
+  reminderEmailEnabled     Boolean      @default(true)
+  widgetPrimaryColor       String       @default("#000000")
+  customTerms              String?
+
+  organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────
+// SUBSCRIPTIONS
+// ─────────────────────────────────────────
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String?
+  plan                 SubscriptionPlan   @default(BASIC)
+  status               SubscriptionStatus @default(TRIALING)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  trialEndsAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  organization         Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+// ─────────────────────────────────────────
+// PHYSICAL LAYOUT
+// ─────────────────────────────────────────
+
+model DiningArea {
+  id             String       @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  sortOrder      Int          @default(0)
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tables         Table[]
+
+  @@index([organizationId])
+}
+
+model Table {
+  id             String       @id @default(cuid())
+  organizationId String
+  diningAreaId   String
+  name           String
+  capacity       Int
+  minCapacity    Int          @default(1)
+  shape          TableShape   @default(RECTANGLE)
+  isActive       Boolean      @default(true)
+  isCombinable   Boolean      @default(false)
+  notes          String?
+  posX           Int          @default(0)
+  posY           Int          @default(0)
+  width          Int          @default(2)
+  height         Int          @default(2)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  diningArea     DiningArea       @relation(fields: [diningAreaId], references: [id], onDelete: Cascade)
+  reservations   ReservationTable[]
+
+  @@index([organizationId])
+  @@index([diningAreaId])
+}
+
+enum TableShape {
+  RECTANGLE
+  CIRCLE
+  SQUARE
+  OVAL
+}
+
+// ─────────────────────────────────────────
+// RESERVATIONS
+// ─────────────────────────────────────────
+
+model Reservation {
+  id                String            @id @default(cuid())
+  organizationId    String
+  reservationNumber String
+
+  guestName         String
+  guestEmail        String?
+  guestPhone        String?
+  partySize         Int
+
+  date              DateTime
+  durationMins      Int               @default(90)
+
+  status            ReservationStatus @default(CONFIRMED)
+  source            ReservationSource
+
+  notes             String?
+  specialRequests   String?
+  dietaryNotes      String?
+  occasion          String?
+
+  depositPaid       Boolean           @default(false)
+  depositAmount     Decimal?
+
+  createdByUserId   String?
+  confirmedAt       DateTime?
+  canceledAt        DateTime?
+  cancelReason      String?
+  noShowAt          DateTime?
+  seatedAt          DateTime?
+  completedAt       DateTime?
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  organization      Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tables            ReservationTable[]
+  auditLog          ReservationAuditLog[]
+
+  @@index([organizationId])
+  @@index([organizationId, date])
+  @@index([organizationId, status])
+  @@index([reservationNumber])
+}
+
+model ReservationTable {
+  id            String      @id @default(cuid())
+  reservationId String
+  tableId       String
+  assignedAt    DateTime    @default(now())
+  assignedBy    String?
+
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  table         Table       @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@unique([reservationId, tableId])
+  @@index([tableId])
+  @@index([reservationId])
+}
+
+enum ReservationStatus {
+  INQUIRY
+  CONFIRMED
+  WAITLISTED
+  SEATED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum ReservationSource {
+  TELEPHONE
+  IN_PERSON
+  WALKIN
+  WEB_FORM
+  EMAIL
+  SOCIAL_MEDIA
+  THIRD_PARTY
+}
+
+// ─────────────────────────────────────────
+// AUDIT
+// ─────────────────────────────────────────
+
+model ReservationAuditLog {
+  id            String      @id @default(cuid())
+  reservationId String
+  action        String
+  previousValue Json?
+  newValue      Json?
+  performedBy   String?
+  performedAt   DateTime    @default(now())
+
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+}
