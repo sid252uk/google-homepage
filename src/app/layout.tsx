@@ -10,7 +10,7 @@ const geistSans = Geist({
 })
 
 export const metadata: Metadata = {
-  title: "TableFlow — Restaurant Table Management",
+  title: "Prenota — Restaurant Table Management",
   description: "Professional reservation and table management for restaurants",
 }
 

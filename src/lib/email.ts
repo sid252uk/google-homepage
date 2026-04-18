@@ -3,7 +3,7 @@ import { format } from "date-fns"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const FROM = process.env.EMAIL_FROM ?? "TableFlow <noreply@resend.dev>"
+const FROM = process.env.EMAIL_FROM ?? "Prenota <noreply@resend.dev>"
 
 export interface ReservationEmailData {
   orgName: string
@@ -32,7 +32,7 @@ function baseTemplate(title: string, body: string) {
         <!-- Header -->
         <tr>
           <td style="background:#0f172a;padding:28px 40px;">
-            <p style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">TableFlow</p>
+            <p style="margin:0;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">Prenota</p>
           </td>
         </tr>
         <!-- Body -->
@@ -45,7 +45,7 @@ function baseTemplate(title: string, body: string) {
         <tr>
           <td style="background:#f8fafc;padding:24px 40px;border-top:1px solid #e2e8f0;">
             <p style="margin:0;color:#94a3b8;font-size:12px;">
-              This email was sent by TableFlow on behalf of the restaurant. If you have questions, please contact the restaurant directly.
+              This email was sent by Prenota on behalf of the restaurant. If you have questions, please contact the restaurant directly.
             </p>
           </td>
         </tr>

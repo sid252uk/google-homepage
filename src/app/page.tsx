@@ -11,9 +11,9 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground text-sm font-bold">T</span>
+              <span className="text-primary-foreground text-sm font-bold">P</span>
             </div>
-            <span className="font-bold text-lg">TableFlow</span>
+            <span className="font-bold text-lg">Prenota</span>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild>
@@ -36,7 +36,7 @@ export default function LandingPage() {
           <span className="text-primary">effortlessly</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          TableFlow gives your restaurant a powerful reservation management system with
+          Prenota gives your restaurant a powerful reservation management system with
           an interactive table plan, multi-source bookings, and real-time updates — all
           in one place.
         </p>
@@ -112,7 +112,7 @@ export default function LandingPage() {
 
       <footer className="border-t">
         <div className="mx-auto max-w-6xl px-4 py-8 flex items-center justify-between text-sm text-muted-foreground">
-          <span>© {new Date().getFullYear()} TableFlow</span>
+          <span>© {new Date().getFullYear()} Prenota</span>
           <span>Restaurant Table Management</span>
         </div>
       </footer>

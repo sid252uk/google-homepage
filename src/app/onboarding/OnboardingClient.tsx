@@ -79,9 +79,9 @@ export function OnboardingClient({ hasClerkOrg }: OnboardingClientProps) {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-          <span className="text-primary-foreground text-xl font-bold">T</span>
+          <span className="text-primary-foreground text-xl font-bold">P</span>
         </div>
-        <h1 className="text-3xl font-bold">Welcome to TableFlow</h1>
+        <h1 className="text-3xl font-bold">Welcome to Prenota</h1>
         <p className="text-muted-foreground mt-2">
           Create your restaurant to get started.
         </p>
