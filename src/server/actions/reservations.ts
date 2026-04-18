@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma"
 import { requireOrgAccess } from "@/lib/auth"
 import { generateReservationNumber } from "@/lib/reservation-number"
 import { ReservationStatus, ReservationSource } from "@/generated/prisma"
+import { sendConfirmationEmail } from "@/lib/email"
 
 const reservationSchema = z.object({
   guestName: z.string().min(1, "Guest name is required"),
@@ -57,6 +58,20 @@ export async function createReservation(orgSlug: string, formData: FormData) {
       performedBy: userId ?? undefined,
     },
   })
+
+  if (reservation.guestEmail && org.settings?.confirmationEmailEnabled !== false) {
+    void sendConfirmationEmail({
+      orgName: org.name,
+      guestName: reservation.guestName,
+      guestEmail: reservation.guestEmail,
+      reservationNumber: reservation.reservationNumber,
+      date: reservation.date,
+      partySize: reservation.partySize,
+      durationMins: reservation.durationMins,
+      specialRequests: reservation.specialRequests,
+      occasion: reservation.occasion,
+    })
+  }
 
   revalidatePath(`/${orgSlug}/reservations`)
   return { success: true, id: reservation.id }

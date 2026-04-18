@@ -5,6 +5,60 @@ import { prisma } from "@/lib/prisma"
 import { requireOrgAccess } from "@/lib/auth"
 import { z } from "zod"
 
+const orgProfileSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  phone: z.string().optional(),
+  email: z.string().email().optional().or(z.literal("")),
+  address: z.string().optional(),
+  timezone: z.string().optional(),
+  currency: z.string().optional(),
+})
+
+const orgSettingsSchema = z.object({
+  openingTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
+  closingTime: z.string().regex(/^\d{2}:\d{2}$/, "Invalid time"),
+  slotIntervalMins: z.coerce.number().int().min(5).max(120),
+  defaultResDurationMins: z.coerce.number().int().min(15).max(480),
+  maxPartySize: z.coerce.number().int().min(1).max(200),
+  requireDeposit: z.string().optional().transform((v) => v === "on" || v === "true"),
+  depositAmount: z.coerce.number().optional(),
+  reminderHoursBefore: z.coerce.number().int().min(1).max(72),
+  confirmationEmailEnabled: z.string().optional().transform((v) => v === "on" || v === "true"),
+  reminderEmailEnabled: z.string().optional().transform((v) => v === "on" || v === "true"),
+  widgetPrimaryColor: z.string().optional(),
+  customTerms: z.string().optional(),
+})
+
+export async function updateOrgProfile(orgSlug: string, formData: FormData) {
+  const org = await requireOrgAccess(orgSlug)
+  const parsed = orgProfileSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message }
+
+  const { email, ...rest } = parsed.data
+  await prisma.organization.update({
+    where: { id: org.id },
+    data: { email: email || null, ...rest },
+  })
+
+  revalidatePath(`/${orgSlug}/settings/general`)
+  return { success: true }
+}
+
+export async function updateOrgSettings(orgSlug: string, formData: FormData) {
+  const org = await requireOrgAccess(orgSlug)
+  const parsed = orgSettingsSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message }
+
+  await prisma.organizationSettings.upsert({
+    where: { organizationId: org.id },
+    update: parsed.data,
+    create: { organizationId: org.id, ...parsed.data },
+  })
+
+  revalidatePath(`/${orgSlug}/settings/general`)
+  return { success: true }
+}
+
 const areaSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { UtensilsCrossed, Users, CreditCard, Globe } from "lucide-react"
+import { UtensilsCrossed, Users, CreditCard, Globe, Settings } from "lucide-react"
 import { getSubscriptionPlan, PLAN_LABELS } from "@/lib/subscription"
 
 export default async function SettingsPage({
@@ -40,6 +40,12 @@ export default async function SettingsPage({
       title: "Web Booking Widget",
       description: "Get the embed code for your restaurant's website",
       href: `/${orgSlug}/settings/widget`,
+    },
+    {
+      icon: Settings,
+      title: "General",
+      description: "Restaurant profile, opening hours, slot settings, and email notifications",
+      href: `/${orgSlug}/settings/general`,
     },
   ]
 

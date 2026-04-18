@@ -77,7 +77,7 @@ export function Sidebar({ orgSlug, orgName, plan }: SidebarProps) {
     },
     {
       label: "General",
-      href: `/${orgSlug}/settings`,
+      href: `/${orgSlug}/settings/general`,
       icon: Settings,
     },
   ]

@@ -3,6 +3,7 @@ import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { generateReservationNumber } from "@/lib/reservation-number"
 import { ReservationSource, ReservationStatus } from "@/generated/prisma"
+import { sendConfirmationEmail } from "@/lib/email"
 
 const schema = z.object({
   orgSlug: z.string().min(1),
@@ -70,6 +71,19 @@ export async function POST(req: NextRequest) {
       ...rest,
     },
   })
+
+  if (reservation.guestEmail && org.settings?.confirmationEmailEnabled !== false) {
+    void sendConfirmationEmail({
+      orgName: org.name,
+      guestName: reservation.guestName,
+      guestEmail: reservation.guestEmail,
+      reservationNumber: reservation.reservationNumber,
+      date: reservation.date,
+      partySize: reservation.partySize,
+      durationMins: reservation.durationMins,
+      specialRequests: reservation.specialRequests,
+    })
+  }
 
   return NextResponse.json({ reservationNumber: reservation.reservationNumber }, { status: 201 })
 }
