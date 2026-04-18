@@ -6,8 +6,11 @@ import { startOfDay, endOfDay, addDays } from "date-fns"
 // Called daily by Vercel Cron (configure in vercel.json) or any external scheduler.
 // Requires CRON_SECRET header to prevent unauthorised calls.
 export async function GET(req: Request) {
-  const secret = req.headers.get("x-cron-secret")
-  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
+  // Accept both x-cron-secret (manual) and Vercel's Authorization: Bearer format
+  const xSecret = req.headers.get("x-cron-secret")
+  const bearer = req.headers.get("authorization")?.replace("Bearer ", "")
+  const provided = xSecret ?? bearer
+  if (process.env.CRON_SECRET && provided !== process.env.CRON_SECRET) {
     return new Response("Unauthorised", { status: 401 })
   }
 
