@@ -63,6 +63,13 @@ export default async function ReservationsPage({ params, searchParams }: PagePro
         }
       />
       <div className="flex-1 overflow-auto p-6">
+        {/* Mobile: always show list view only */}
+        <div className="sm:hidden">
+          <ListView reservations={reservations} orgSlug={orgSlug} selectedDate={sp.date} />
+        </div>
+
+        {/* Desktop: full tab switcher */}
+        <div className="hidden sm:block">
         <Tabs defaultValue={view}>
           <TabsList className="mb-4">
             <TabsTrigger value="list" asChild>
@@ -83,21 +90,12 @@ export default async function ReservationsPage({ params, searchParams }: PagePro
           </TabsList>
 
           <TabsContent value="list">
-            <ListView
-              reservations={reservations}
-              orgSlug={orgSlug}
-              selectedDate={sp.date}
-            />
+            <ListView reservations={reservations} orgSlug={orgSlug} selectedDate={sp.date} />
           </TabsContent>
 
           <TabsContent value="timeslot">
             {canSeeTimeslot ? (
-              <TimeSlotView
-                reservations={reservations}
-                tables={tables}
-                orgSlug={orgSlug}
-                date={date}
-              />
+              <TimeSlotView reservations={reservations} tables={tables} orgSlug={orgSlug} date={date} />
             ) : (
               <div className="rounded-lg border-2 border-dashed p-12 text-center">
                 <Lock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
@@ -114,11 +112,7 @@ export default async function ReservationsPage({ params, searchParams }: PagePro
 
           <TabsContent value="calendar">
             {canSeeCalendar ? (
-              <CalendarView
-                reservations={reservations}
-                orgSlug={orgSlug}
-                selectedDate={sp.date}
-              />
+              <CalendarView reservations={reservations} orgSlug={orgSlug} selectedDate={sp.date} />
             ) : (
               <div className="rounded-lg border-2 border-dashed p-12 text-center">
                 <Lock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />
@@ -130,6 +124,7 @@ export default async function ReservationsPage({ params, searchParams }: PagePro
             )}
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   )
