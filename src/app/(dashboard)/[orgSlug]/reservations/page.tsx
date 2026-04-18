@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ListView } from "@/components/reservations/views/ListView"
 import { TimeSlotView } from "@/components/reservations/views/TimeSlotView"
+import { CalendarView } from "@/components/reservations/views/CalendarView"
 import { requireOrgAccess } from "@/lib/auth"
 import { getReservations } from "@/server/queries/reservations"
 import { getSubscriptionPlan, hasModule } from "@/lib/subscription"
@@ -113,9 +114,11 @@ export default async function ReservationsPage({ params, searchParams }: PagePro
 
           <TabsContent value="calendar">
             {canSeeCalendar ? (
-              <div className="text-center text-muted-foreground py-8">
-                Calendar view coming soon.
-              </div>
+              <CalendarView
+                reservations={reservations}
+                orgSlug={orgSlug}
+                selectedDate={sp.date}
+              />
             ) : (
               <div className="rounded-lg border-2 border-dashed p-12 text-center">
                 <Lock className="mx-auto h-8 w-8 text-muted-foreground mb-3" />

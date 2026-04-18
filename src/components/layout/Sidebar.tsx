@@ -11,6 +11,7 @@ import {
   CreditCard,
   ChevronDown,
   UtensilsCrossed,
+  Home,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
@@ -34,6 +35,11 @@ export function Sidebar({ orgSlug, orgName, plan }: SidebarProps) {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
+    {
+      label: "Dashboard",
+      href: `/${orgSlug}/dashboard`,
+      icon: Home,
+    },
     {
       label: "Reservations",
       href: `/${orgSlug}/reservations`,
